@@ -18,9 +18,9 @@ df <- read_csv("Efficiency_Markets_Access.csv")
 \newpage
 # Overview of the Data
 
-This dataset merges utility-level performance metrics with country-level market structure and governance characteristics, as well as national electricity access rates. The data was cleaned, merged, and reshaped to support a benchmarking analysis of 49 electric utilities across 37 countries. The final tidy dataset includes 21 variables.
+This codebook accompanies the dataset "Efficiency_Markets_Access.csv", which merges utility-level performance metrics with country-level electricity market structure, governance characteristics, and national electricity access rates. The dataset supports a benchmarking analysis of 49 electric utilities across 37 countries and includes 21 cleaned and standardized variables.
 
-This codebook accompanies the dataset titled "Efficiency_Markets_Access.csv", which contains the cleaned and merged data used for analysis. The complete data wrangling process — including variable transformations, DEA score calculation, and data integration — is documented in the replication script "Efficiency-market-access_dataset_creation.R".
+The data was processed through multiple steps, including cleaning, merging, reshaping, and the construction of efficiency scores using Data Envelopment Analysis (DEA). These steps are fully documented in the replication script "Efficiency_scores-market-access_dataset_creation.R", which ensures the process is transparent and reproducible.
 
 # Sources and Data Wrangling
 
