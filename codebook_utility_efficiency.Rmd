@@ -1,0 +1,375 @@
+---
+title: "Codebook: Utility Efficiency, Market Structure, and Access to Electricity"
+author: "Edgar Aguilar"
+date: "April 20, 2025"
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(readr)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+df <- read_csv("Efficiency_Markets_Access.csv")
+```
+\newpage
+# Overview of the Data
+
+This dataset merges utility-level performance metrics with country-level market structure and governance characteristics, as well as national electricity access rates. The data was cleaned, merged, and reshaped to support a benchmarking analysis of 49 electric utilities across 37 countries. The final tidy dataset includes 21 variables.
+
+# Sources and Data Wrangling
+
+**Data Sources:**
+
+- [UPBEAT Utility Database](https://utilityperformance.energydata.info/about/intro): Utility performance and financial indicators.
+- [World Bank Market Structure Dataset](https://datacatalog.worldbank.org/search/dataset/0065245): Country-level electricity market structures and governance characteristics.
+- [World Bank - Access to Electricity (WDI)](https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS): National electricity access rates.
+
+**Wrangling Steps:**
+
+- Computed the average value of input and output indicators across all available years for each utility.
+- Performed DEA using an input-oriented CCR model in R.
+- Merged DEA scores with 2012 market structure data.
+- Joined 2022 national electricity access data.
+- Standardized names and cleaned structure.
+
+# Data Envelopment Analysis (DEA) Methodology
+
+The **Efficiency Score** variable in this dataset was constructed using **Data Envelopment Analysis (DEA)**, a non-parametric technique for benchmarking the relative efficiency of utilities in transforming inputs into outputs. This project applies an **input-oriented CCR model** (assuming constant returns to scale), which estimates how much a utility could reduce its inputs while maintaining its output levels.
+
+The input and output variables were sourced from the **UPBEAT utility performance database**, a World Bank initiative that standardizes multi-year utility data across financial, operational, and technical indicators. For each utility, input and output values were averaged across all available years in the dataset to create a representative profile.
+
+**Inputs:**
+- Employees
+- Total Assets
+
+**Outputs:**
+- Net Profit Margin
+- Customers
+- Transformed Distribution Losses (1 - Distribution Losses)
+
+The model was implemented in R using the `Benchmarking` package. Utilities with missing input/output values were excluded.
+
+# Variable Descriptions and Summaries
+
+## Utility Long Name
+- **Type:** Character
+- **Description:** Full legal name of the electric utility.
+- **Source:** UPBEAT
+
+## Utility Short Name
+- **Type:** Character
+- **Description:** Abbreviated or acronym version of the utility name.
+- **Source:** UPBEAT
+
+## Ownership
+- **Type:** Factor
+- **Description:** Ownership structure of the utility (Public or Private).
+- **Source:** UPBEAT
+```{r}
+table(df$Ownership, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Ownership", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Type
+- **Description:** Categorical variable describing the operational structure of the utility. All utilities in the dataset include a **distribution component** in their operations, but may also engage in other segments of the power sector:
+  - **D (Distribution-only):** Utility is solely responsible for electricity distribution.
+  - **G&D (Generation and Distribution):** Utility is involved in both electricity generation and distribution, but not transmission.
+  - **VIU (Vertically Integrated Utility):** Utility is active across the entire electricity value chain, including generation, transmission, and distribution.
+- **Source:** UPBEAT
+```{r}
+table(df$Type, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Type", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Country
+- **Type:** Character
+- **Description:** Country of operation.
+- **Source:** World Bank Market Structure Dataset
+```{r country-list-kable-wrap}
+# Create comma-separated, wrapped country list
+country_list <- df %>%
+  distinct(Country) %>%
+  arrange(Country) %>%
+  pull(Country) %>%
+  paste(collapse = ", ")
+
+# Display table
+tibble(Countries = country_list) %>%
+  kable(caption = "List of Countries in the Dataset", booktabs = TRUE, escape = TRUE) %>%
+  kable_styling(full_width = FALSE, latex_options = "hold_position") %>%
+  column_spec(1, width = "13cm")
+```
+*The dataset includes `r n_distinct(df$Country)` unique countries.*
+
+\newpage
+## Region  
+- **Type:** Factor
+- **Description:** Geographical region classification assigned to each country. 
+- **Source:** UPBEAT (World Bank classification)
+```{r}
+table(df$Region, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Region", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Income Group
+- **Type:** Factor
+- **Description:** Country income classification (Low, Lower-middle, etc.).
+- **Source:** UPBEAT (World Bank classification)
+```{r}
+table(df$`Income Group`, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Income Group", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Employees
+- **Type:** Numeric
+- **Description:** Total number of employees in utility company. 
+- **Source:** UPBEAT
+```{r}
+df %>%
+  summarize(
+    Min = min(Employees, na.rm = TRUE),
+    Q1 = quantile(Employees, 0.25, na.rm = TRUE),
+    Median = median(Employees, na.rm = TRUE),
+    Mean = mean(Employees, na.rm = TRUE),
+    Q3 = quantile(Employees, 0.75, na.rm = TRUE),
+    Max = max(Employees, na.rm = TRUE),
+    NAs = sum(is.na(Employees))
+  ) %>%
+  kable(caption = "Summary: Employees", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Total Assets
+- **Type:** Numeric
+- **Description:** Total assets in USD millions.
+- **Source:** UPBEAT
+```{r}
+df %>%
+  summarize(
+    Min = min(`Total Assets`, na.rm = TRUE),
+    Q1 = quantile(`Total Assets`, 0.25, na.rm = TRUE),
+    Median = median(`Total Assets`, na.rm = TRUE),
+    Mean = mean(`Total Assets`, na.rm = TRUE),
+    Q3 = quantile(`Total Assets`, 0.75, na.rm = TRUE),
+    Max = max(`Total Assets`, na.rm = TRUE),
+    NAs = sum(is.na(`Total Assets`))
+  ) %>%
+  kable(caption = "Summary: Total Assets", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+\newpage
+## Net Profit Margin
+- **Type:** Numeric
+- **Description:** Net profit as a percentage of revenue.
+- **Source:** UPBEAT
+```{r}
+df %>%
+  summarize(
+    Min = min(`Net Profit Margin`, na.rm = TRUE),
+    Q1 = quantile(`Net Profit Margin`, 0.25, na.rm = TRUE),
+    Median = median(`Net Profit Margin`, na.rm = TRUE),
+    Mean = mean(`Net Profit Margin`, na.rm = TRUE),
+    Q3 = quantile(`Net Profit Margin`, 0.75, na.rm = TRUE),
+    Max = max(`Net Profit Margin`, na.rm = TRUE),
+    NAs = sum(is.na(`Net Profit Margin`))
+  ) %>%
+  kable(caption = "Summary: Net Profit Margin", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Customers
+- **Type:** Numeric
+- **Description:** Number of customers served by utility company.
+- **Source:** UPBEAT
+```{r}
+df %>%
+  summarize(
+    Min = min(Customers, na.rm = TRUE),
+    Q1 = quantile(Customers, 0.25, na.rm = TRUE),
+    Median = median(Customers, na.rm = TRUE),
+    Mean = mean(Customers, na.rm = TRUE),
+    Q3 = quantile(Customers, 0.75, na.rm = TRUE),
+    Max = max(Customers, na.rm = TRUE),
+    NAs = sum(is.na(Customers))
+  ) %>%
+  kable(caption = "Summary: Customers", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Distribution Losses
+- **Type:** Numeric
+- **Description:** Share of electricity lost in distribution.
+- **Source:** UPBEAT
+```{r}
+df %>%
+  summarize(
+    Min = min(`Distribution Losses`, na.rm = TRUE),
+    Q1 = quantile(`Distribution Losses`, 0.25, na.rm = TRUE),
+    Median = median(`Distribution Losses`, na.rm = TRUE),
+    Mean = mean(`Distribution Losses`, na.rm = TRUE),
+    Q3 = quantile(`Distribution Losses`, 0.75, na.rm = TRUE),
+    Max = max(`Distribution Losses`, na.rm = TRUE),
+    NAs = sum(is.na(`Distribution Losses`))
+  ) %>%
+  kable(caption = "Summary: Distribution Losses", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Transformed Distribution Losses
+- **Type:** Numeric
+- **Description:** 1 minus distribution losses.
+- **Source:** UPBEAT (calculated)
+- **Note:** This is a transformation of "Distribution Losses" variable to fit DEA model appropiately as an output.
+```{r}
+df %>%
+  summarize(
+    Min = min(`Transformed Distribution Losses`, na.rm = TRUE),
+    Q1 = quantile(`Transformed Distribution Losses`, 0.25, na.rm = TRUE),
+    Median = median(`Transformed Distribution Losses`, na.rm = TRUE),
+    Mean = mean(`Transformed Distribution Losses`, na.rm = TRUE),
+    Q3 = quantile(`Transformed Distribution Losses`, 0.75, na.rm = TRUE),
+    Max = max(`Transformed Distribution Losses`, na.rm = TRUE),
+    NAs = sum(is.na(`Transformed Distribution Losses`))
+  ) %>%
+  kable(caption = "Summary: Transformed Distribution Losses", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+\newpage
+## Operating and Debt Service Cost Recovery
+- **Type:** Numeric
+- **Description:** Ratio of billed revenue to cost of service, calculated on a billed basis (excluding subsidies and collections). This reflects whether the utility is generating enough billed revenue to cover its operating costs and debt service obligations.
+- **Source:** UPBEAT
+```{r}
+df %>%
+  summarize(
+    Min = min(`Operating and Debt Service Cost Recovery`, na.rm = TRUE),
+    Q1 = quantile(`Operating and Debt Service Cost Recovery`, 0.25, na.rm = TRUE),
+    Median = median(`Operating and Debt Service Cost Recovery`, na.rm = TRUE),
+    Mean = mean(`Operating and Debt Service Cost Recovery`, na.rm = TRUE),
+    Q3 = quantile(`Operating and Debt Service Cost Recovery`, 0.75, na.rm = TRUE),
+    Max = max(`Operating and Debt Service Cost Recovery`, na.rm = TRUE),
+    NAs = sum(is.na(`Operating and Debt Service Cost Recovery`))
+  ) %>%
+  kable(caption = "Summary: Cost Recovery", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Efficiency Score
+- **Type:** Numeric
+- **Description:** A Data Envelopment Analysis (DEA) efficiency score ranging from 0 to 1, where 1 indicates a fully efficient utility. Scores were computed using an input-oriented CCR model based on selected input (Employees, Total Assets) and output (Net Profit Margin, Customers, Transformed Distribution Losses) variables.
+- **Source:** UPBEAT (DEA computed)
+```{r}
+df %>%
+  summarize(
+    Min = min(`Efficiency Score`, na.rm = TRUE),
+    Q1 = quantile(`Efficiency Score`, 0.25, na.rm = TRUE),
+    Median = median(`Efficiency Score`, na.rm = TRUE),
+    Mean = mean(`Efficiency Score`, na.rm = TRUE),
+    Q3 = quantile(`Efficiency Score`, 0.75, na.rm = TRUE),
+    Max = max(`Efficiency Score`, na.rm = TRUE),
+    NAs = sum(is.na(`Efficiency Score`))
+  ) %>%
+  kable(caption = "Summary: Efficiency Score", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Market Structure  
+- **Type:** Factor  
+- **Description:** Categorical variable representing the utility's national power market structure, based on a simplified classification derived from World Bank market reform data. The three categories are:
+  - **VIU (Vertically Integrated Utility):** The utility operates within a fully integrated system controlling generation, transmission, and distribution.
+  - **SBM (Single Buyer Model):** A central purchasing entity procures electricity from generators and sells it to distributors or end-users.
+  - **WRC (Wholesale-Retail Competition):** Market features competition at both the wholesale and retail levels, allowing multiple sellers and/or buyers.
+- **Note:** This classification reflects the extent of market liberalization and unbundling reforms in the utility’s country of operation as of 2012.
+- **Source:** World Bank Market Structure Dataset
+```{r}
+table(df$`Market Structure`, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Market Structure", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+\newpage
+## Regulator
+- **Type:** Logical
+- **Description:** TRUE if an independent regulator exists.
+- **Source:** World Bank Market Structure Dataset
+```{r}
+table(df$Regulator, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Regulator", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Private IPP Established
+- **Type:** Logical
+- **Description:** TRUE if Independent Power Producer (IPP) exist.
+- **Source:** World Bank Market Structure Dataset
+```{r}
+table(df$`Private IPP Established`, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("IPP Established", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Unbundling
+- **Type:** Logical
+- **Description:** TRUE if transmission is unbundled.
+- **Source:** World Bank Market Structure Dataset
+```{r}
+table(df$Unbundling, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Unbundling", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+## Out of VIU
+- **Type:** Logical
+- **Description:** TRUE if the utility is no longer vertically integrated.
+- **Source:** World Bank Market Structure Dataset
+```{r}
+table(df$`Out of VIU`, useNA = "ifany") %>%
+  as.data.frame() %>%
+  kable(col.names = c("Out of VIU", "Count"), align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+\newpage
+## Access 2022
+- **Type:** Numeric
+- **Description:** Percent of national population with electricity access in 2022.
+- **Source:** World Bank World Development Indicators (WDI)
+```{r}
+df %>%
+  summarize(
+    Min = min(`Access 2022`, na.rm = TRUE),
+    Q1 = quantile(`Access 2022`, 0.25, na.rm = TRUE),
+    Median = median(`Access 2022`, na.rm = TRUE),
+    Mean = mean(`Access 2022`, na.rm = TRUE),
+    Q3 = quantile(`Access 2022`, 0.75, na.rm = TRUE),
+    Max = max(`Access 2022`, na.rm = TRUE),
+    NAs = sum(is.na(`Access 2022`))
+  ) %>%
+  kable(caption = "Summary: Access to Electricity (2022)", align = "c") %>%
+  kable_styling(full_width = FALSE)
+```
+
+# Notes
+
+- DEA efficiency scores were calculated using the CCR input-oriented model.
+- Monetary figures are in millions of USD.
+- Logical fields show TRUE/FALSE flags for market conditions.
+- This dataset was developed as part of my Substantial Research Paper (SRP) to fulfill the requirements for the Master of Arts in International Economic Relations: Quantiative Methods at American University. The data preparation, analysis, and documentation were completed in Spring 2025.
