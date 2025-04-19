@@ -74,7 +74,10 @@ The model was implemented in R using the `Benchmarking` package. Utilities with 
 ```{r}
 table(df$Ownership, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Ownership", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Ownership", "Count"),
+    caption = "Ownership Structure of Utilities"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -87,10 +90,14 @@ table(df$Ownership, useNA = "ifany") %>%
 ```{r}
 table(df$Type, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Type", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Type", "Count"),
+    caption = "Distribution of Utility Operational Structures"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
+\newpage
 ## Country
 - **Type:** Character
 - **Description:** Country of operation.
@@ -111,7 +118,6 @@ tibble(Countries = country_list) %>%
 ```
 *The dataset includes `r n_distinct(df$Country)` unique countries.*
 
-\newpage
 ## Region  
 - **Type:** Factor
 - **Description:** Geographical region classification assigned to each country. 
@@ -119,7 +125,10 @@ tibble(Countries = country_list) %>%
 ```{r}
 table(df$Region, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Region", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Region", "Count"),
+    caption = "Distribution of Utilities by Geographical Region"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -130,10 +139,14 @@ table(df$Region, useNA = "ifany") %>%
 ```{r}
 table(df$`Income Group`, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Income Group", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Income Group", "Count"),
+    caption = "Distribution of Utilities by Income Group"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
+\newpage
 ## Employees
 - **Type:** Numeric
 - **Description:** Total number of employees in utility company. 
@@ -149,7 +162,7 @@ df %>%
     Max = max(Employees, na.rm = TRUE),
     NAs = sum(is.na(Employees))
   ) %>%
-  kable(caption = "Summary: Employees", align = "c") %>%
+  kable(caption = "Summary - Employees", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -168,11 +181,10 @@ df %>%
     Max = max(`Total Assets`, na.rm = TRUE),
     NAs = sum(is.na(`Total Assets`))
   ) %>%
-  kable(caption = "Summary: Total Assets", align = "c") %>%
+  kable(caption = "Summary - Total Assets", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
-\newpage
 ## Net Profit Margin
 - **Type:** Numeric
 - **Description:** Net profit as a percentage of revenue.
@@ -188,7 +200,7 @@ df %>%
     Max = max(`Net Profit Margin`, na.rm = TRUE),
     NAs = sum(is.na(`Net Profit Margin`))
   ) %>%
-  kable(caption = "Summary: Net Profit Margin", align = "c") %>%
+  kable(caption = "Summary - Net Profit Margin", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -207,10 +219,11 @@ df %>%
     Max = max(Customers, na.rm = TRUE),
     NAs = sum(is.na(Customers))
   ) %>%
-  kable(caption = "Summary: Customers", align = "c") %>%
+  kable(caption = "Summary - Customers", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
+\newpage
 ## Distribution Losses
 - **Type:** Numeric
 - **Description:** Share of electricity lost in distribution.
@@ -226,7 +239,7 @@ df %>%
     Max = max(`Distribution Losses`, na.rm = TRUE),
     NAs = sum(is.na(`Distribution Losses`))
   ) %>%
-  kable(caption = "Summary: Distribution Losses", align = "c") %>%
+  kable(caption = "Summary - Distribution Losses", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -246,11 +259,10 @@ df %>%
     Max = max(`Transformed Distribution Losses`, na.rm = TRUE),
     NAs = sum(is.na(`Transformed Distribution Losses`))
   ) %>%
-  kable(caption = "Summary: Transformed Distribution Losses", align = "c") %>%
+  kable(caption = "Summary - Transformed Distribution Losses", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
-\newpage
 ## Operating and Debt Service Cost Recovery
 - **Type:** Numeric
 - **Description:** Ratio of billed revenue to cost of service, calculated on a billed basis (excluding subsidies and collections). This reflects whether the utility is generating enough billed revenue to cover its operating costs and debt service obligations.
@@ -266,7 +278,7 @@ df %>%
     Max = max(`Operating and Debt Service Cost Recovery`, na.rm = TRUE),
     NAs = sum(is.na(`Operating and Debt Service Cost Recovery`))
   ) %>%
-  kable(caption = "Summary: Cost Recovery", align = "c") %>%
+  kable(caption = "Summary - Cost Recovery", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -285,7 +297,7 @@ df %>%
     Max = max(`Efficiency Score`, na.rm = TRUE),
     NAs = sum(is.na(`Efficiency Score`))
   ) %>%
-  kable(caption = "Summary: Efficiency Score", align = "c") %>%
+  kable(caption = "Summary - Efficiency Score", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -300,11 +312,13 @@ df %>%
 ```{r}
 table(df$`Market Structure`, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Market Structure", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Market Structure", "Count"),
+    caption = "Distribution of Utilities by Market Structure"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
-\newpage
 ## Regulator
 - **Type:** Logical
 - **Description:** TRUE if an independent regulator exists.
@@ -312,7 +326,10 @@ table(df$`Market Structure`, useNA = "ifany") %>%
 ```{r}
 table(df$Regulator, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Regulator", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Regulator", "Count"),
+    caption = "Presence of Independent Regulators"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -323,10 +340,14 @@ table(df$Regulator, useNA = "ifany") %>%
 ```{r}
 table(df$`Private IPP Established`, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("IPP Established", "Count"), align = "c") %>%
+  kable(
+    col.names = c("IPP Established", "Count"),
+    caption = "Existence of Independent Power Producers (IPPs)"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
+\newpage
 ## Unbundling
 - **Type:** Logical
 - **Description:** TRUE if transmission is unbundled.
@@ -334,7 +355,10 @@ table(df$`Private IPP Established`, useNA = "ifany") %>%
 ```{r}
 table(df$Unbundling, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Unbundling", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Unbundling", "Count"),
+    caption = "Transmission Unbundling Status"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
@@ -345,11 +369,13 @@ table(df$Unbundling, useNA = "ifany") %>%
 ```{r}
 table(df$`Out of VIU`, useNA = "ifany") %>%
   as.data.frame() %>%
-  kable(col.names = c("Out of VIU", "Count"), align = "c") %>%
+  kable(
+    col.names = c("Out of VIU", "Count"),
+    caption = "Utilities Exiting Vertically Integrated Utility (Out of VIU)"
+  ) %>%
   kable_styling(full_width = FALSE)
 ```
 
-\newpage
 ## Access 2022
 - **Type:** Numeric
 - **Description:** Percent of national population with electricity access in 2022.
@@ -365,7 +391,7 @@ df %>%
     Max = max(`Access 2022`, na.rm = TRUE),
     NAs = sum(is.na(`Access 2022`))
   ) %>%
-  kable(caption = "Summary: Access to Electricity (2022)", align = "c") %>%
+  kable(caption = "Summary - Access to Electricity (2022)", align = "c") %>%
   kable_styling(full_width = FALSE)
 ```
 
