@@ -82,6 +82,7 @@ table(df$Ownership, useNA = "ifany") %>%
 ```
 
 ## Type
+- **Type:** Factor
 - **Description:** Categorical variable describing the operational structure of the utility. All utilities in the dataset include a **distribution component** in their operations, but may also engage in other segments of the power sector:
   - **D (Distribution-only):** Utility is solely responsible for electricity distribution.
   - **G&D (Generation and Distribution):** Utility is involved in both electricity generation and distribution, but not transmission.
