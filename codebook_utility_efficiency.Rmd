@@ -18,9 +18,22 @@ df <- read_csv("Efficiency_Markets_Access.csv")
 \newpage
 # Overview of the Data
 
-This codebook accompanies the dataset "Efficiency_Markets_Access.csv", which merges utility-level performance metrics with country-level electricity market structure, governance characteristics, and national electricity access rates. The dataset supports a benchmarking analysis of 49 electric utilities across 37 countries and includes 21 cleaned and standardized variables.
+This codebook accompanies the dataset **`Efficiency_Markets_Access.csv`**, which merges utility‑level performance metrics with country‑level market structure, governance characteristics, and national electricity access rates. The dataset supports a benchmarking analysis of **49 electric utilities across 37 countries** and includes **21 cleaned and standardized variables**.
 
-The data was processed through multiple steps, including cleaning, merging, reshaping, and the construction of efficiency scores using Data Envelopment Analysis (DEA). These steps are fully documented in the replication script "Efficiency_scores-market-access_dataset_creation.R", which ensures the process is transparent and reproducible.
+The dataset brings together three complementary snapshots:
+
+1. **Utility Performance (2012–2022)**  
+   - Inputs (Employees; Total Assets) and outputs (Net Profit Margin; Customers; Transformed Distribution Losses) are **averaged over the 2012–2022 period** using the UPBEAT Utility Database. This decadal average smooths year‑to‑year volatility and captures each utility’s steady‐state performance.
+
+2. **Market Structure & Governance (2012)**  
+   - Country‑level market structure classification, presence of an independent regulator, independent power producer (IPP) establishment, transmission unbundling, and exit from vertical integration—are fixed at their **2012 values**, drawn from the World Bank’s electricity market reform dataset (covering 1989–2024). Aligning these to 2012 ensures consistency with the start of our performance window.
+
+3. **Electricity Access (2022)**  
+   - National household electrification rates for **2022** are taken from the World Development Indicators, anchoring each utility’s environment to the most recent year of access data.
+
+In total, **49 utilities** across **37 countries** are represented by **21 cleaned and standardized variables**.  
+
+All data‑processing steps—from cleaning and merging to reshaping and DEA score calculation—are fully reproducible via the replication script **`Efficiency_scores-market-access_dataset_creation.R`**.
 
 # Sources and Data Wrangling
 
@@ -30,13 +43,14 @@ The data was processed through multiple steps, including cleaning, merging, resh
 - [World Bank Market Structure Dataset](https://datacatalog.worldbank.org/search/dataset/0065245): Country-level electricity market structures and governance characteristics.
 - [World Bank - Access to Electricity (WDI)](https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS): National electricity access rates.
 
+
 **Wrangling Steps:**
 
-- Computed the average value of input and output indicators across all available years for each utility.
-- Performed DEA using an input-oriented CCR model in R.
-- Merged DEA scores with 2012 market structure data.
-- Joined 2022 national electricity access data.
-- Standardized names and cleaned structure.
+1. **Calculate decade‑long averages** of each input/output indicator (2012–2022).
+2. **Run DEA** (input‑oriented CCR model) to compute efficiency scores.
+3. **Merge** DEA scores with **2012** market structure and governance data.
+4. **Join** 2022 electricity access rates.
+5. **Standardize** variable names, data types, and factor levels; document NAs with explicit codes. 
 
 # Data Envelopment Analysis (DEA) Methodology
 
