@@ -1,5 +1,5 @@
 # codebook
-This are the files you want to find:
+These are the files you want to find:
 
 1. codebook_utility_efficiency.pdf;
 2. codebook_utility_efficiency.Rmd;
